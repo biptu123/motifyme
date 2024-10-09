@@ -6,10 +6,7 @@ import {
   CognitoUserSession,
 } from "amazon-cognito-identity-js";
 import { _storeToken } from "./async-storage";
-// import { COGNITO_POOL_ID, APP_CLIENT_ID } from "@env";
-
-const COGNITO_POOL_ID = "ap-south-1_W2GXHRjrE";
-const APP_CLIENT_ID = "24klk1167k95cb4t82af2ju48j";
+import { COGNITO_POOL_ID, APP_CLIENT_ID } from "@env";
 
 const poolData = {
   UserPoolId: COGNITO_POOL_ID,

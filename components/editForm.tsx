@@ -45,12 +45,7 @@ const EditFrom = ({ note }: { note: Note }) => {
     };
     console.log("🚀 ~ onToggle ~ note:", notePayload);
 
-    const response = await updateNote({
-      id: note.id.toString(),
-      note: notePayload,
-      username: user.username,
-      token: user.accessToken ?? "",
-    });
+    const response = await updateNote(notePayload);
     console.log(response);
     if ("statusCode" in response.data && response?.data?.statusCode === 200) {
       router.navigate("/(dashboard)");

@@ -21,10 +21,7 @@ const colors = ["#FFC90B", "#BFFC71", "#A1F9EA", "#538CCF", "#F46060"];
 
 const AddForm = () => {
   const user = useSelector((state: RootState) => state.user);
-  const { data, isLoading, isSuccess, isError } = useGetAllIdsQuery({
-    username: user.username,
-    token: user.accessToken,
-  });
+  const { data, isLoading, isSuccess, isError } = useGetAllIdsQuery(null);
 
   const [createNote] = useAddNoteMutation();
   const [title, setTitle] = useState("");
@@ -51,11 +48,7 @@ const AddForm = () => {
     };
     console.log("🚀 ~ onToggle ~ note:", note);
 
-    const response = await createNote({
-      note,
-      username: user.username,
-      token: user.accessToken ?? "",
-    });
+    const response = await createNote(note);
     console.log(response);
     if ("statusCode" in response.data && response?.data?.statusCode === 200) {
       router.navigate("/(dashboard)");

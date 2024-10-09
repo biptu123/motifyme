@@ -5,20 +5,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import useFetchUser from "@/hooks/useFetchUser";
 import { useSelector } from "react-redux";
 import store, { RootState } from "@/store/store";
-import { noteApi } from "@/store/apis/noteApi";
-import { noteApiSlice } from "@/store/slices/noteSlice";
+import { noteApiSlice, useGetAllNotesQuery } from "@/store/slices/noteSlice";
+import { _retrieveToken } from "@/lib/async-storage";
+import { requestNotificationPermission } from "@/lib/notification";
+store.dispatch(noteApiSlice.endpoints.getAllNotes.initiate(null));
 
 const Index = () => {
   const router = useRouter();
   const { loading, error } = useFetchUser();
-  const user = useSelector((state: RootState) => state.user);
-  store.dispatch(
-    noteApiSlice.endpoints.getAllNotes.initiate({
-      username: user.username,
-      limit: 5,
-      token: user.accessToken,
-    })
-  );
+  const { isLoading, isError } = useGetAllNotesQuery(null);
 
   useEffect(() => {
     const onBackPress = () => {
@@ -41,15 +36,19 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    if (!loading) {
-      if (user.accessToken) {
-        console.log(user.accessToken);
-        router.replace("/(dashboard)");
-      } else {
-        router.replace("/login");
-      }
+    if (isError || error) {
+      router.replace("/login");
     }
-  }, [loading, user, router]);
+    if (!loading && !isLoading) {
+      _retrieveToken().then((token) => {
+        if (token) {
+          router.replace("/(dashboard)");
+        } else {
+          router.replace("/login");
+        }
+      });
+    }
+  }, [loading, router, isLoading, isError, error]);
 
   return (
     <SafeAreaView>

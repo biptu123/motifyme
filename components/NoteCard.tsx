@@ -15,13 +15,8 @@ type PropsType = {
 
 const NoteCard = ({ note, expanded, handleToggle }: PropsType) => {
   const [deleteNote, { isLoading }] = useDeleteNoteMutation();
-  const user = useSelector((state: RootState) => state.user);
   const handleDelete = (id: string) => {
-    deleteNote({
-      id,
-      username: user.username,
-      token: user.accessToken ?? "",
-    });
+    deleteNote(id);
   };
 
   return (

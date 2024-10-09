@@ -5,11 +5,7 @@ import Skeleton from "./Skeleton";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useFocusEffect } from "expo-router";
-import {
-  selectAllNotes,
-  selectNoteIds,
-  useGetAllNotesQuery,
-} from "@/store/slices/noteSlice";
+import { useGetAllNotesQuery } from "@/store/slices/noteSlice";
 
 const Notes = () => {
   const [expanded, setExpanded] = useState<string>("");
@@ -23,15 +19,7 @@ const Notes = () => {
     isSuccess,
     isError,
     error,
-  } = useGetAllNotesQuery({
-    username: user.username,
-    limit: 1,
-    token: user.accessToken,
-    key: lastEvaluatedKey, // Passing the LastEvaluatedKey for pagination
-  });
-  console.log("🚀 ~ Notes ~ notes:", notes);
-  const ids = useSelector(selectNoteIds);
-  console.log("------  id -------- ", ids);
+  } = useGetAllNotesQuery(lastEvaluatedKey);
 
   const handleToggle = (flag: boolean | null = null, id: string | number) => {
     if (flag) setExpanded("");

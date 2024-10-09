@@ -1,10 +1,25 @@
-import React from "react";
-import { Stack } from "expo-router";
+import React, { useEffect } from "react";
+import { router, Stack } from "expo-router";
 import { Provider } from "react-redux";
 import store from "@/store/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { requestNotificationPermission } from "@/lib/notification";
+import { Alert, BackHandler } from "react-native";
 
 const RootLayout = () => {
+  useEffect(() => {
+    requestNotificationPermission().then((hasPermission) => {
+      console.log(hasPermission);
+      if (!hasPermission) {
+        Alert.alert(
+          "Error",
+          "Notification permission is required to use this app."
+        );
+        router.replace("/login");
+        // BackHandler.exitApp();
+      }
+    });
+  });
   return (
     <GestureHandlerRootView>
       <Provider store={store}>

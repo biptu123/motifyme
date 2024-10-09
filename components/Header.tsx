@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useSignout } from "@/lib/cognito";
 import { router } from "expo-router";
+import { _removeToken, _removeUsername } from "@/lib/async-storage";
 
 const Header = () => {
   const user = useSelector((state: RootState) => state.user);
@@ -21,6 +22,8 @@ const Header = () => {
           try {
             const signoutResult = await useSignout();
             if (signoutResult === true) {
+              _removeToken();
+              _removeUsername();
               router.navigate("/login");
             } else {
               console.error("Error during signout:", signoutResult);

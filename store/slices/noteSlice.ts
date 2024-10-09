@@ -1,8 +1,13 @@
 import { createEntityAdapter, createSelector } from "@reduxjs/toolkit";
 import { apiSlice } from "../apis/apiSlice";
-import { Note } from "@/models/Note";
-import { RootState } from "../store";
-import { useSelector } from "react-redux";
+import { Note, NotePayload } from "@/models/Note";
+import { BASE_URL, NOTES_LIMIT } from "@env";
+import {
+  _retrieveToken,
+  _retrieveUsername,
+  _storeIds,
+} from "@/lib/async-storage";
+import { BaseQueryFn, fetchBaseQuery } from "@reduxjs/toolkit/query";
 
 // Adapter to manage normalized state
 const noteAdapter = createEntityAdapter({
@@ -13,48 +18,39 @@ const noteAdapter = createEntityAdapter({
 // Initial state for the adapter
 const initialState = noteAdapter.getInitialState();
 
-export const {
-  selectAll: selectAllNotes,
-  selectById: selectNoteById,
-  selectIds: selectNoteIds,
-} = noteAdapter.getSelectors((state: any) => initialState);
-
 // Inject RTK Query API endpoints
 export const noteApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addNote: builder.mutation({
-      query: ({ username, note, token }) => ({
-        url: `/${username}`,
+      query: (note) => ({
+        url: ``,
         method: "POST",
         body: JSON.stringify(note),
         headers: {
-          authorizationToken: token,
           "Content-Type": "application/json",
         },
       }),
       invalidatesTags: ["Meta", { type: "Note", id: "LIST" }],
     }),
     editNote: builder.mutation({
-      query: ({ username, id, token, note }) => ({
-        url: `/${username}?id=${id}`,
+      query: (note: NotePayload) => ({
+        url: `?id=${note.note_id}`,
         method: "PUT",
         body: JSON.stringify(note),
         headers: {
-          authorizationToken: token,
           "Content-Type": "application/json",
         },
       }),
       invalidatesTags: (result, error, arg) => [
         "Meta",
-        { type: "Note", id: arg.id },
+        { type: "Note", id: arg.note_id },
       ],
     }),
     deleteNote: builder.mutation({
-      query: ({ username, id, token }) => ({
-        url: `/${username}?id=${id}`,
+      query: (id) => ({
+        url: `?id=${id}`,
         method: "DELETE",
         headers: {
-          authorizationToken: token,
           "Content-Type": "application/json",
         },
       }),
@@ -64,13 +60,12 @@ export const noteApiSlice = apiSlice.injectEndpoints({
       ],
     }),
     getAllNotes: builder.query({
-      query: ({ username, key, limit, token }) => ({
+      query: (key = null) => ({
         url: key
-          ? `/${username}/all_notes?limit=${limit}&key=${key}`
-          : `/${username}/all_notes?limit=${limit}`,
+          ? `/all_notes?limit=${NOTES_LIMIT}&key=${key}`
+          : `/all_notes?limit=${NOTES_LIMIT}`,
         method: "GET",
         headers: {
-          authorizationToken: token,
           "Content-Type": "application/json",
         },
       }),
@@ -93,21 +88,6 @@ export const noteApiSlice = apiSlice.injectEndpoints({
           lastEvaluatedKey: response.LastEvaluatedKey || null,
         };
       },
-      // async onQueryStarted(
-      //   { username, key, limit, token },
-      //   { queryFulfilled, dispatch, getState }
-      // ) {
-      //   console.log("here");
-      //   // const state = getState();
-      //   // await queryFulfilled;
-      //   if (key) {
-      //     console.log("looking for key");
-      //     const data = useSelector(selectNoteIds);
-      //     // const existingNotes = noteAdapter.getSelectors().selectAll(state.api)
-
-      //     console.log("state", data);
-      //   }
-      // },
       providesTags: (result: any, error, arg) =>
         result && result.ids && Array.isArray(result.ids)
           ? [
@@ -119,14 +99,20 @@ export const noteApiSlice = apiSlice.injectEndpoints({
           : [{ type: "Note", id: "LIST" }],
     }),
     getAllIds: builder.query({
-      query: ({ username, token }) => ({
-        url: `/${username}/meta`,
+      query: () => ({
+        url: `/meta`,
         method: "GET",
         headers: {
-          authorizationToken: token,
           "Content-Type": "application/json",
         },
       }),
+      transformResponse: async (response: any, meta: any, arg: any) => {
+        if (response.statusCode === 200) {
+          const ids = response.body.map((item: any) => item.note_id);
+          _storeIds(JSON.stringify(ids));
+        }
+        return response;
+      },
       providesTags: ["Meta"],
     }),
   }),
@@ -134,34 +120,8 @@ export const noteApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useGetAllNotesQuery,
-  useGetAllIdsQuery,
   useAddNoteMutation,
   useEditNoteMutation,
   useDeleteNoteMutation,
+  useGetAllIdsQuery,
 } = noteApiSlice;
-
-// Selector to extract the query result (entire query response)
-export const selectNotesResult = (queryArgs: {
-  username: string;
-  key?: string;
-  limit: number;
-  token: string;
-}) => noteApiSlice.endpoints.getAllNotes.select(queryArgs);
-
-// Selector to extract the actual data from the query result
-const selectNotesData = createSelector(
-  selectNotesResult,
-  (notesResult: any) => {
-    console.log("notes result ============", notesResult);
-    return notesResult?.data || initialState;
-  }
-);
-
-// Entity adapter selectors
-// export const {
-//   selectAll: selectAllNotes,
-//   selectById: selectNoteById,
-//   selectIds: selectNoteIds,
-// } = noteAdapter.getSelectors(
-//   (state: any) => selectNotesData(state) ?? initialState
-// );

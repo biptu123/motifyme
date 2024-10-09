@@ -2,7 +2,6 @@ import { View, Text, Image, Pressable, Vibration } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import AddForm from "@/components/addForm";
 import EditFrom from "@/components/editForm";
 import { Note } from "@/models/Note";
 
@@ -28,7 +27,7 @@ const Edit = () => {
             id: params.id.toString(),
             title: params.title.toString(),
             desc: params.desc.toString(),
-            createdAt: new Date(params.createdAt.toString()),
+            createdAt: params.createdAt.toString(),
             color: params.color.toString(),
           }}
         />
