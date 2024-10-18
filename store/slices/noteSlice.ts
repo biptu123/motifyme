@@ -1,21 +1,21 @@
 import { createEntityAdapter, createSelector } from "@reduxjs/toolkit";
 import { apiSlice } from "../apis/apiSlice";
 import { Note, NotePayload } from "@/models/Note";
-import { BASE_URL, NOTES_LIMIT } from "@env";
 import {
   _retrieveToken,
   _retrieveUsername,
   _storeIds,
 } from "@/lib/async-storage";
-import { BaseQueryFn, fetchBaseQuery } from "@reduxjs/toolkit/query";
+import store from "../store";
+
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+const NOTES_LIMIT = process.env.EXPO_PUBLIC_NOTES_LIMIT;
 
 // Adapter to manage normalized state
 const noteAdapter = createEntityAdapter({
   selectId: (note: Note) => String(note.id),
-  // sortComparer: (a, b) => b.created_at.localCompare(a.created_at),
 });
 
-// Initial state for the adapter
 const initialState = noteAdapter.getInitialState();
 
 // Inject RTK Query API endpoints
@@ -56,7 +56,7 @@ export const noteApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, arg) => [
         "Meta",
-        { type: "Note", id: arg.id },
+        { type: "Note", id: arg.note_id },
       ],
     }),
     getAllNotes: builder.query({
@@ -81,10 +81,16 @@ export const noteApiSlice = apiSlice.injectEndpoints({
           }));
         }
 
-        // Otherwise, replace current state
-        noteAdapter.setMany(initialState, loadedNotes);
+        let currentState: any = initialState;
+
+        // if (arg) {
+        //   const providedArray = [...store?.getState()?.api?.provided.Note.LIST];
+        //   const name = providedArray.pop();
+        //   if (name) currentState = store?.getState()?.api.queries[name]?.data;
+        // }
+
         return {
-          ...noteAdapter.setMany(initialState, loadedNotes),
+          ...noteAdapter.addMany(currentState, loadedNotes),
           lastEvaluatedKey: response.LastEvaluatedKey || null,
         };
       },

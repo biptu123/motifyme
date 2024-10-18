@@ -5,7 +5,8 @@ import {
   scheduleNotification,
   stopNotifications,
 } from "./notification";
-import { TIME_INTERVAL } from "@env";
+
+const TIME_INTERVAL = process.env.EXPO_PUBLIC_TIME_INTERVAL;
 
 const BACKGROUND_FETCH_TASK = "background-fetch-task";
 
@@ -25,7 +26,7 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
 export const registerBackgroundFetch = async () => {
   try {
     await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: TIME_INTERVAL,
+      minimumInterval: Number(TIME_INTERVAL),
       stopOnTerminate: false,
       startOnBoot: true,
     });

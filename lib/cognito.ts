@@ -6,12 +6,13 @@ import {
   CognitoUserSession,
 } from "amazon-cognito-identity-js";
 import { _storeToken } from "./async-storage";
-import { COGNITO_POOL_ID, APP_CLIENT_ID } from "@env";
 
 const poolData = {
-  UserPoolId: COGNITO_POOL_ID,
-  ClientId: APP_CLIENT_ID,
+  UserPoolId: String(process.env.EXPO_PUBLIC_COGNITO_POOL_ID),
+  ClientId: String(process.env.EXPO_PUBLIC_APP_CLIENT_ID),
 };
+
+console.log(poolData);
 
 const userPool = new CognitoUserPool(poolData);
 interface ResponseError {

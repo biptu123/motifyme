@@ -1,10 +1,11 @@
 import { _retrieveToken, _retrieveUsername } from "@/lib/async-storage";
-import { BASE_URL } from "@env";
 import {
   BaseQueryFn,
   createApi,
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
+
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 // Base query that adds the token to every request
 const baseQueryWithToken: BaseQueryFn = async (args, api, extraOptions) => {
