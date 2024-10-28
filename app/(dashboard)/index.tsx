@@ -1,20 +1,13 @@
-import { View, Image, Pressable, Alert } from "react-native";
+import { View, Image, Pressable, Alert, Text } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { _retrieveToken } from "@/lib/async-storage";
 import { Href, useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/Header";
-import useFetchUser from "@/hooks/useFetchUser";
-import TitleText from "@/components/TitleText";
 import Notes from "@/components/Notes";
-import { useGetAllIdsQuery } from "@/store/slices/noteSlice";
-import { ScrollView } from "react-native-gesture-handler";
 
 const Dashboard = () => {
   const router = useRouter();
-  const { loading, error } = useFetchUser();
-  const { data: ids } = useGetAllIdsQuery(null);
-  const [token, setToken] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -23,8 +16,6 @@ const Dashboard = () => {
         if (!retrievedToken) {
           // Navigate to login if no token
           router.navigate("/login");
-        } else {
-          setToken(retrievedToken);
         }
       });
     }, [])

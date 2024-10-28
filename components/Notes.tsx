@@ -11,16 +11,17 @@ const Notes = () => {
   const [expanded, setExpanded] = useState<string>("");
   const [loadingMore, setLoadingMore] = useState(false);
   const [lastEvaluatedKey, setLastEvaluatedKey] = useState<string | null>(null);
-  const [notes, setNotes] = useState<any[]>([]);
 
   // Fetch notes, refetch when lastEvaluatedKey changes
   const {
-    data: fetchedNotes,
+    data: notes,
     isLoading,
     isSuccess,
     isError,
     error,
   } = useGetAllNotesQuery(lastEvaluatedKey);
+
+  const { ids, entities } = notes;
 
   const handleToggle = (flag: boolean | null = null, id: string | number) => {
     if (flag) setExpanded("");
@@ -29,46 +30,29 @@ const Notes = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (notes && notes.length > 0 && expanded === "") {
-        setExpanded(notes[0].id); // Expand the first note initially
+      if (notes && ids?.length > 0 && expanded === "") {
+        setExpanded(ids[0]); // Expand the first note initially
       }
     }, [notes])
   );
 
-  useEffect(() => {
-    if (fetchedNotes && fetchedNotes.ids?.length > 0) {
-      setNotes((prevNotes) => {
-        // Avoid re-setting the same data, which can trigger unnecessary renders
-        const newNotes = Object.values(fetchedNotes.entities);
-        const combinedNotes = [...prevNotes, ...newNotes];
-
-        // Prevent duplicates in case the same notes are fetched again
-        const uniqueNotes = Array.from(
-          new Set(combinedNotes.map((note) => note.id))
-        ).map((id) => combinedNotes.find((note) => note.id === id));
-
-        return uniqueNotes;
-      });
-    }
-  }, [fetchedNotes.ids]);
-
   // Function to handle fetching more notes when the user reaches the end of the list
   const handleShowNext = () => {
-    if (fetchedNotes?.lastEvaluatedKey && !loadingMore) {
+    if (notes?.lastEvaluatedKey && !loadingMore) {
       setLoadingMore(true);
       setLastEvaluatedKey(
-        encodeURIComponent(JSON.stringify(fetchedNotes.lastEvaluatedKey))
+        encodeURIComponent(JSON.stringify(notes.lastEvaluatedKey))
       );
     }
   };
 
   useEffect(() => {
-    if (fetchedNotes && loadingMore) {
+    if (notes && loadingMore) {
       setLoadingMore(false);
     }
-  }, [fetchedNotes]);
+  }, [notes]);
 
-  if (isLoading && notes.length === 0) {
+  if (isLoading && ids?.length === 0) {
     return (
       <View style={{ padding: 20 }}>
         <Skeleton width="80%" height={30} borderRadius={8} />
@@ -80,43 +64,41 @@ const Notes = () => {
 
   if (isError) return <Text>Failed to load notes.</Text>;
 
-  if (isSuccess) {
-    return (
-      <View className="w-full">
-        <FlatList
-          className="mx-[21] h-[90vh]"
-          showsVerticalScrollIndicator={true}
-          data={notes}
-          keyExtractor={(note, index) => index.toString()}
-          contentContainerStyle={{ paddingBottom: 150 }}
-          ListHeaderComponent={<TitleText />}
-          ListFooterComponent={
-            loadingMore ? (
-              <ActivityIndicator
-                animating={true}
-                color={"#000000"}
-                size={"large"}
-              />
-            ) : null // Only show ActivityIndicator if loading more notes
-          }
-          renderItem={({ item: note }: { item: any }) =>
-            note && (
+  return (
+    <View className="w-full">
+      <FlatList
+        className="h-[90vh]"
+        showsVerticalScrollIndicator={true}
+        data={ids}
+        keyExtractor={(id) => id}
+        contentContainerStyle={{ paddingBottom: 150 }}
+        ListHeaderComponent={<TitleText />}
+        ListFooterComponent={
+          loadingMore ? (
+            <ActivityIndicator
+              animating={true}
+              color={"#000000"}
+              size={"large"}
+            />
+          ) : null // Only show ActivityIndicator if loading more notes
+        }
+        renderItem={({ item: id }) =>
+          id && (
+            <View className="w-[90%] ml-auto mr-auto">
               <NoteCard
-                note={note}
-                expanded={expanded === note.id}
+                note={entities[id]}
+                expanded={expanded === id}
                 handleToggle={handleToggle}
-                key={note.id}
+                key={id}
               />
-            )
-          }
-          onEndReached={handleShowNext}
-          onEndReachedThreshold={0.1}
-        />
-      </View>
-    );
-  }
-
-  return null;
+            </View>
+          )
+        }
+        onEndReached={handleShowNext}
+        onEndReachedThreshold={0.1}
+      />
+    </View>
+  );
 };
 
 export default Notes;

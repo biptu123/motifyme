@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.biptu.motifyme"
     },
     "web": {
       "bundler": "metro",
@@ -29,16 +30,19 @@
     "plugins": [
       "expo-router",
       [
-        "expo-notifications",
+        "react-native-google-mobile-ads",
         {
-          "icon": "./assets/icon.png",
-          "color": "#ffffff",
-          "defaultChannel": "default"
+          "androidAppId": "ca-app-pub-5911190957502933~2456876676"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3b587d66-4131-4dbd-9bdc-6b8a532d8deb"
+      }
     }
   }
 }

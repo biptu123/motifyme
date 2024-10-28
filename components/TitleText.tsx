@@ -1,12 +1,35 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, Text, Platform } from "react-native";
+import React, { useRef } from "react";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  useForeground,
+} from "react-native-google-mobile-ads";
+
+const adUnitId = __DEV__
+  ? TestIds.ADAPTIVE_BANNER
+  : "ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy";
 
 const TitleText = () => {
+  const bannerRef = useRef<BannerAd>(null);
+  useForeground(() => {
+    Platform.OS === "ios" && bannerRef.current?.load();
+  });
   return (
-    <View className="my-[50]  mx-[21]">
-      <Text className="font-[900] text-[40px]">YOUR</Text>
-      <Text className="font-bold text-[40px]">NOTES</Text>
-    </View>
+    <>
+      <View className="mt-5">
+        <BannerAd
+          ref={bannerRef}
+          unitId={adUnitId}
+          size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+        />
+      </View>
+      <View className="my-[50] w-[90%] ml-auto mr-auto">
+        <Text className="font-[900] text-[40px]">YOUR</Text>
+        <Text className="font-bold text-[40px]">NOTES</Text>
+      </View>
+    </>
   );
 };
 

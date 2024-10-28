@@ -4,6 +4,7 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from "react-native";
 import React, { useRef, useState } from "react";
 import classNames from "classnames";
@@ -19,7 +20,22 @@ import { router } from "expo-router";
 
 const colors = ["#FFC90B", "#BFFC71", "#A1F9EA", "#538CCF", "#F46060"];
 
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  useForeground,
+} from "react-native-google-mobile-ads";
+
+const adUnitId = __DEV__
+  ? TestIds.ADAPTIVE_BANNER
+  : "ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy";
+
 const AddForm = () => {
+  const bannerRef = useRef<BannerAd>(null);
+  useForeground(() => {
+    Platform.OS === "ios" && bannerRef.current?.load();
+  });
   const user = useSelector((state: RootState) => state.user);
   const { data, isLoading, isSuccess, isError } = useGetAllIdsQuery(null);
 
@@ -78,6 +94,13 @@ const AddForm = () => {
           borderRadius: 10,
         }}
       />
+      <View className="mt-5 ml-auto mr-auto">
+        <BannerAd
+          ref={bannerRef}
+          unitId={adUnitId}
+          size={BannerAdSize.BANNER}
+        />
+      </View>
       <View className="mt-[50] mb-[20]">
         <Text className="font-[700] text-[16px]">
           {createdAt.toLocaleString("en-US", { weekday: "long" })}

@@ -83,11 +83,11 @@ export const noteApiSlice = apiSlice.injectEndpoints({
 
         let currentState: any = initialState;
 
-        // if (arg) {
-        //   const providedArray = [...store?.getState()?.api?.provided.Note.LIST];
-        //   const name = providedArray.pop();
-        //   if (name) currentState = store?.getState()?.api.queries[name]?.data;
-        // }
+        if (arg) {
+          const providedArray = [...store?.getState()?.api?.provided.Note.LIST];
+          const name = providedArray.pop();
+          if (name) currentState = store?.getState()?.api.queries[name]?.data;
+        }
 
         return {
           ...noteAdapter.addMany(currentState, loadedNotes),

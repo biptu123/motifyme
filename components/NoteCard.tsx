@@ -1,10 +1,15 @@
 import { Note } from "@/models/Note";
-import React, { useState } from "react";
-import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import classNames from "classnames";
 import { useDeleteNoteMutation } from "@/store/slices/noteSlice";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import { router } from "expo-router";
 
 type PropsType = {
@@ -14,10 +19,20 @@ type PropsType = {
 };
 
 const NoteCard = ({ note, expanded, handleToggle }: PropsType) => {
-  const [deleteNote, { isLoading }] = useDeleteNoteMutation();
+  const [deleteNote, { isLoading, isError, isSuccess, error }] =
+    useDeleteNoteMutation();
   const handleDelete = (id: string) => {
     deleteNote(id);
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      Alert.alert("Deleted Successfully");
+    }
+    if (isError) {
+      Alert.alert("Error Deleting Note");
+    }
+  }, [isError, isSuccess]);
 
   return (
     <Pressable
@@ -25,7 +40,7 @@ const NoteCard = ({ note, expanded, handleToggle }: PropsType) => {
         backgroundColor: note.color,
       }}
       className={classNames(
-        `w-full rounded-[20px] px-[55] my-2`,
+        `rounded-[20px] px-[55] my-2`,
         {
           "h-[53]": !expanded,
           "h-[215]": expanded,
