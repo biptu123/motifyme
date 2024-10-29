@@ -63,6 +63,7 @@ const Login = () => {
             accessToken: response.accessToken,
           })
         );
+        await _storeToken(response.accessToken);
         setErrMessage(null);
         Vibration.vibrate(150);
         router.navigate("/(dashboard)");

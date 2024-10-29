@@ -3,10 +3,12 @@ import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import userReducer from "./slices/userSlice";
 import { apiSlice } from "./apis/apiSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import keyReducer from "./slices/keySlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    key: keyReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,4 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+  ScrollView,
+} from "react-native";
 import React, { useRef, useState } from "react";
 import classNames from "classnames";
 import SwipeButton, { RefType } from "./SwipeButton";
@@ -16,7 +23,6 @@ import { Note, NotePayload } from "@/models/Note";
 const colors = ["#FFC90B", "#BFFC71", "#A1F9EA", "#538CCF", "#F46060"];
 
 const EditFrom = ({ note }: { note: Note }) => {
-  console.log(note);
   const user = useSelector((state: RootState) => state.user);
   const { data, isLoading, isSuccess, isError } = useGetAllIdsQuery({
     username: user.username,
@@ -60,7 +66,7 @@ const EditFrom = ({ note }: { note: Note }) => {
   };
 
   return (
-    <View>
+    <ScrollView>
       <TextInput
         onChangeText={(value) => setTitle(value)}
         value={title}
@@ -85,7 +91,7 @@ const EditFrom = ({ note }: { note: Note }) => {
           ).padStart(2, "0")}, ${createdAt.getFullYear()}`}
         </Text>
       </View>
-      <View className="h-[318] rounded-[42px] bg-[#332B2B] p-10">
+      <View className="h-[300] rounded-[42px] bg-[#332B2B] p-10">
         <TextInput
           onChangeText={(value) => setDesc(value)}
           value={desc}
@@ -123,14 +129,14 @@ const EditFrom = ({ note }: { note: Note }) => {
           );
         })}
       </View>
-      <View className="my-[20] justify-center items-center">
+      <View className="my-[20] justify-center items-center pb-[50]">
         <SwipeButton
           onToggle={onToggle}
           ref={swipeButtonRef}
           displayText="Swipe To Update"
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

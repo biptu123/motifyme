@@ -37,7 +37,7 @@ const Header = () => {
   };
 
   return (
-    <View className="flex-row w-full justify-between items-center">
+    <View className="flex-row w-full justify-between items-center pb-[10]">
       {/* User Section */}
       <View className="flex-row items-center gap-2">
         <Image

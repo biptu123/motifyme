@@ -1,11 +1,12 @@
 import { View, Text, Platform } from "react-native";
-import React, { useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import {
   BannerAd,
   BannerAdSize,
   TestIds,
   useForeground,
 } from "react-native-google-mobile-ads";
+import { useFocusEffect } from "expo-router";
 
 const adUnitId = __DEV__
   ? TestIds.ADAPTIVE_BANNER
@@ -16,6 +17,11 @@ const TitleText = () => {
   useForeground(() => {
     Platform.OS === "ios" && bannerRef.current?.load();
   });
+  useFocusEffect(
+    useCallback(() => {
+      bannerRef.current?.load();
+    }, [])
+  );
   return (
     <>
       <View className="mt-5">

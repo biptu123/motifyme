@@ -6,11 +6,18 @@ import { useFocusEffect } from "expo-router";
 import { useGetAllNotesQuery } from "@/store/slices/noteSlice";
 import { FlatList } from "react-native-gesture-handler";
 import TitleText from "./TitleText";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { setKey } from "@/store/slices/keySlice";
 
 const Notes = () => {
   const [expanded, setExpanded] = useState<string>("");
   const [loadingMore, setLoadingMore] = useState(false);
-  const [lastEvaluatedKey, setLastEvaluatedKey] = useState<string | null>(null);
+  const lastEvaluatedKey = useSelector(
+    (state: RootState) => state.key.lastEvaluatedKey
+  );
+
+  const dispatch = useDispatch();
 
   // Fetch notes, refetch when lastEvaluatedKey changes
   const {
@@ -19,9 +26,7 @@ const Notes = () => {
     isSuccess,
     isError,
     error,
-  } = useGetAllNotesQuery(lastEvaluatedKey);
-
-  const { ids, entities } = notes;
+  }: any = useGetAllNotesQuery(lastEvaluatedKey);
 
   const handleToggle = (flag: boolean | null = null, id: string | number) => {
     if (flag) setExpanded("");
@@ -30,8 +35,8 @@ const Notes = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (notes && ids?.length > 0 && expanded === "") {
-        setExpanded(ids[0]); // Expand the first note initially
+      if (notes && notes?.ids?.length > 0 && expanded === "") {
+        setExpanded(notes?.ids[0]); // Expand the first note initially
       }
     }, [notes])
   );
@@ -40,8 +45,12 @@ const Notes = () => {
   const handleShowNext = () => {
     if (notes?.lastEvaluatedKey && !loadingMore) {
       setLoadingMore(true);
-      setLastEvaluatedKey(
-        encodeURIComponent(JSON.stringify(notes.lastEvaluatedKey))
+      dispatch(
+        setKey({
+          lastEvaluatedKey: encodeURIComponent(
+            JSON.stringify(notes.lastEvaluatedKey)
+          ),
+        })
       );
     }
   };
@@ -52,7 +61,7 @@ const Notes = () => {
     }
   }, [notes]);
 
-  if (isLoading && ids?.length === 0) {
+  if (isLoading && notes?.ids?.length === 0) {
     return (
       <View style={{ padding: 20 }}>
         <Skeleton width="80%" height={30} borderRadius={8} />
@@ -69,7 +78,7 @@ const Notes = () => {
       <FlatList
         className="h-[90vh]"
         showsVerticalScrollIndicator={true}
-        data={ids}
+        data={notes?.ids}
         keyExtractor={(id) => id}
         contentContainerStyle={{ paddingBottom: 150 }}
         ListHeaderComponent={<TitleText />}
@@ -86,7 +95,7 @@ const Notes = () => {
           id && (
             <View className="w-[90%] ml-auto mr-auto">
               <NoteCard
-                note={entities[id]}
+                note={notes?.entities[id]}
                 expanded={expanded === id}
                 handleToggle={handleToggle}
                 key={id}

@@ -1,47 +1,41 @@
 import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
-import {
-  fetchRandomNotification,
-  scheduleNotification,
-  stopNotifications,
-} from "./notification";
 
-const TIME_INTERVAL = process.env.EXPO_PUBLIC_TIME_INTERVAL;
+export const BACKGROUND_FETCH_TASK = "background-fetch";
 
-const BACKGROUND_FETCH_TASK = "background-fetch-task";
-
+// 1. Define the task by providing a name and the function that should be executed
+// Note: This needs to be called in the global scope (e.g outside of your React components)
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
-  try {
-    const response = await fetchRandomNotification();
-    if (response?.title && response?.message) {
-      await scheduleNotification(response);
-    }
-    return BackgroundFetch.BackgroundFetchResult.NewData;
-  } catch (error) {
-    console.log("Error in background task:", error);
-    return BackgroundFetch.BackgroundFetchResult.Failed;
-  }
+  const now = Date.now();
+
+  console.log(
+    `Got background fetch call at date: ${new Date(now).toISOString()}`
+  );
+
+  // Be sure to return the successful result type!
+  return BackgroundFetch.BackgroundFetchResult.NewData;
 });
 
-export const registerBackgroundFetch = async () => {
-  try {
-    await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: Number(TIME_INTERVAL),
-      stopOnTerminate: false,
-      startOnBoot: true,
-    });
-    console.log("Background fetch task registered successfully");
-  } catch (error) {
-    console.log("Error registering background fetch task:", error);
-  }
-};
+export async function registerBackgroundFetchAsync() {
+  return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+    minimumInterval: 60 * 1, // 15 minutes
+    stopOnTerminate: false, // android only,
+    startOnBoot: true, // android only
+  });
+}
 
-export const unregisterBackgroundFetch = async () => {
-  try {
-    await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-    await stopNotifications();
-    console.log("Background fetch task unregistered successfully");
-  } catch (error) {
-    console.log("Error unregistering background fetch task:", error);
-  }
-};
+export async function unregisterBackgroundFetchAsync() {
+  return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+}
+
+export async function getStatusAsync() {
+  return BackgroundFetch.getStatusAsync();
+}
+
+export async function isTaskRegisteredAsync() {
+  return TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK);
+}
+
+export async function getBackgroundFetchStatus(status: any) {
+  return BackgroundFetch.BackgroundFetchStatus[status];
+}

@@ -7,13 +7,12 @@ import { useSelector } from "react-redux";
 import store, { RootState } from "@/store/store";
 import { noteApiSlice, useGetAllNotesQuery } from "@/store/slices/noteSlice";
 import { _retrieveToken } from "@/lib/async-storage";
-import { requestNotificationPermission } from "@/lib/notification";
 store.dispatch(noteApiSlice.endpoints.getAllNotes.initiate(null));
 
 const Index = () => {
   const router = useRouter();
   const { loading, error } = useFetchUser();
-  const { isLoading, isError } = useGetAllNotesQuery(null);
+  // const { isLoading, isError } = useGetAllNotesQuery(null);
 
   useEffect(() => {
     const onBackPress = () => {
@@ -36,10 +35,10 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    if (isError || error) {
+    if (error) {
       router.replace("/login");
     }
-    if (!loading && !isLoading) {
+    if (!loading) {
       _retrieveToken().then((token) => {
         if (token) {
           router.replace("/(dashboard)");
@@ -48,7 +47,7 @@ const Index = () => {
         }
       });
     }
-  }, [loading, router, isLoading, isError, error]);
+  }, [loading, router, error]);
 
   return (
     <SafeAreaView>
